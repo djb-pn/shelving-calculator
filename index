@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picks Gallery - Shelving Calculator</title>
+    <style>
+        :root {
+            /* Picks Gallery Inspired Palette */
+            --primary-bg: #1a1a1a;
+            --secondary-bg: #f4f4f4;
+            --accent-color: #c41230; /* Strong Red */
+            --accent-hover: #a10e28;
+            --text-dark: #333333;
+            --text-light: #ffffff;
+            --border-color: #dddddd;
+            --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --success-green: #28a745;
+            --warning-orange: #fd7e14;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--secondary-bg);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-bg);
+            color: var(--text-light);
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .brand span {
+            color: var(--accent-color);
+            font-weight: 800;
+        }
+
+        /* Main Content */
+        main {
+            padding: 2rem 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-top: 4px solid var(--primary-bg);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .btn {
+            background-color: var(--primary-bg);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: #000;
+        }
+
+        .btn-accent {
+            background-color: var(--accent-color);
+            width: 100%;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-accent:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+        }
+
+        .btn-outline:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-sm {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background-color: #b02a37;
+        }
+
+        /* Room/Shelf List */
+        .room-container {
+            border: 1px solid #eee;
+            background: #fafafa;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        
+        .room-header {
+            background: #e9e9e9;
+            padding: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .shelf-list {
+            padding: 1rem;
+        }
+
+        .shelf-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 30px;
+            gap: 10px;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+
+        .shelf-item:last-child {
+            border-bottom: none;
+        }
+
+        .shelf-item label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 600px) {
+            .shelf-item {
+                grid-template-columns: 1fr;
+                border: 1px solid #ddd;
+                padding: 1rem;
+                border-radius: 4px;
+                margin-bottom: 0.5rem;
+                background: white;
+            }
+        }
+
+        /* Results Area */
+        .results-section {
+            display: none; /* Hidden by default */
+        }
+
+        .result-block {
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .stock-piece {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .cut-instruction {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .waste-save {
+            color: var(--success-green);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .waste-trash {
+            color: #999;
+            font-size: 0.9rem;
+            text-decoration: line-through;
+        }
+
+        table.hw-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table.hw-table th, table.hw-table td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        table.hw-table th {
+            background-color: #f1f1f1;
+        }
+
+        /* Inventory Input */
+        .inventory-input {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .chip {
+            display: inline-block;
+            background: #e0e0e0;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .no-print {
+            display: block;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .grid { display: block; }
+            .card { box-shadow: none; border: 1px solid #ccc; }
+            .results-section { display: block !important; }
+            body { background: white; }
+            header { background: white; color: black; border-bottom: 2px solid black; }
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container brand">
+        <h1>Picks <span>Gallery</span></h1>
+        <div style="font-size: 0.9rem; opacity: 0.8;">Shelving Calculator</div>
+    </div>
+</header>
+
+<main class="container">
+    <div class="grid">
+        
+        <!-- LEFT COLUMN: INPUTS -->
+        <div class="no-print">
+            <div class="card">
+                <h2>Current Job</h2>
+                <div class="form-group">
+                    <label>Job Name / Customer</label>
+                    <input type="text" id="jobName" placeholder="e.g. Smith Residence">
+                </div>
+                
+                <div id="roomsContainer"></div>
+                
+                <button class="btn btn-outline" style="width:100%; border-style:dashed;" onclick="addRoom()">+ Add Room / Closet</button>
+            </div>
+
+            <div class="card">
+                <h2>Existing Inventory (Cutoffs)</h2>
+                <p style="font-size: 0.85rem; color: #666;">Do you have scrap pieces to use up?</p>
+                <div class="form-group">
+                    <label>Add Cutoff Piece</label>
+                    <div class="inventory-input">
+                        <select id="invType" style="flex:2;">
+                            <!-- Populated by JS -->
+                        </select>
+                        <input type="number" id="invLength" placeholder="Length (in)" style="flex:1;">
+                        <button class="btn" onclick="addInventory()">Add</button>
+                    </div>
+                </div>
+                <div id="inventoryList">
+                    <!-- Chips go here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: CONTROLS & SUMMARY -->
+        <div class="no-print">
+            <div class="card" style="position: sticky; top: 20px;">
+                <h2>Actions</h2>
+                <p style="font-size: 0.9rem;">Review your rooms and calculate the most efficient cut list.</p>
+                
+                <button class="btn btn-accent" onclick="calculateJob()">CALCULATE JOB</button>
+                <button class="btn btn-outline" style="width:100%; margin-top: 10px;" onclick="window.print()">Print Results</button>
+                <button class="btn btn-outline" style="width:100%; margin-top: 10px; color: #dc3545; border-color: #dc3545;" onclick="resetJob()">Reset All</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RESULTS SECTION (Generated) -->
+    <div id="resultsArea" class="results-section">
+        <div class="brand no-print" style="margin-bottom: 20px; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px;">
+            <h2>Job Results: <span id="resJobName" style="color:var(--text-dark)"></span></h2>
+        </div>
+        
+        <!-- Hardware List -->
+        <div class="result-block">
+            <h3>hardware Pick List</h3>
+            <table class="hw-table">
+                <thead>
+                    <tr>
+                        <th>Item Description</th>
+                        <th width="100">Qty</th>
+                    </tr>
+                </thead>
+                <tbody id="hardwareTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Cut List -->
+        <div class="result-block">
+            <h3>Cut List (Optimization)</h3>
+            <p style="font-size: 0.9rem; color: #666;">Based on 12' (144") Stock Lengths</p>
+            <div id="cutListContainer"></div>
+        </div>
+
+    </div>
+
+</main>
+
+<script>
+    // --- CONFIGURATION ---
+    
+    // Hardware Formulas per Linear Foot
+    const SHELF_TYPES = {
+        "12_Freeslide": { name: '12" Freeslide', wasteLimit: 48, brace: '12" Support Brace', bracket: 'Freeslide Wall Bracket', multipliers: { 'Extra Small Cap': 0.5, 'Small Cap': 2, 'Large Cap': 2, '1" Screw': 0.4, '1/2 Back Clip': 1.3, 'Freeslide Wall Bracket': 0.38, 'Rod Spacer Cap': 0.01, 'All Purpose Clamp': 0.2, 'Wall Anchor': 0.26, '12" Support Brace': 0.26 } },
+        "16_Freeslide": { name: '16" Freeslide', wasteLimit: 48, brace: '16" Support Brace', bracket: 'Freeslide Wall Bracket', multipliers: { 'Extra Small Cap': 0.5, 'Small Cap': 2, 'Large Cap': 2, '1" Screw': 0.4, '1/2 Back Clip': 1.3, 'Freeslide Wall Bracket': 0.38, 'Rod Spacer Cap': 0.01, 'All Purpose Clamp': 0.2, 'Wall Anchor': 0.26, '16" Support Brace': 0.26 } },
+        "12_Linen": { name: '12" Linen', wasteLimit: 36, brace: '12" Support Brace', bracket: 'Linen Wall Bracket', multipliers: { 'Extra Small Cap': 0.5, 'Small Cap': 2, '1" Screw': 0.4, '1/2 Back Clip': 1.3, 'Linen Wall Bracket': 0.38, 'All Purpose Clamp': 0.2, 'Wall Anchor': 0.26, '12" Support Brace': 0.26 } },
+        "16_Linen": { name: '16" Linen', wasteLimit: 36, brace: '16" Support Brace', bracket: 'Linen Wall Bracket', multipliers: { 'Extra Small Cap': 0.5, 'Small Cap': 2, '1" Screw': 0.4, '1/2 Back Clip': 1.3, 'Linen Wall Bracket': 0.38, 'All Purpose Clamp': 0.2, 'Wall Anchor': 0.26, '16" Support Brace': 0.26 } },
+        "20_Linen": { name: '20" Linen', wasteLimit: 36, brace: '16" Support Brace', bracket: 'Linen Wall Bracket', multipliers: { 'Extra Small Cap': 0.5, 'Small Cap': 2, '1" Screw': 0.4, '1/2 Back Clip': 1.3, 'Linen Wall Bracket': 0.38, 'All Purpose Clamp': 0.2, 'Wall Anchor': 0.26, '16" Support Brace': 0.26 } },
+        "12_Tightmesh": { name: '12" Tightmesh', wasteLimit: 36, brace: '12" Support Brace', bracket: 'Linen Wall Bracket', multipliers: { 'Extra Small Cap': 0.5, 'Small Cap': 2, '1" Screw': 0.4, '1/2 Back Clip': 1.3, 'Linen Wall Bracket': 0.38, 'All Purpose Clamp': 0.2, 'Wall Anchor': 0.26, '12" Support Brace': 0.26 } },
+        "16_Tightmesh": { name: '16" Tightmesh', wasteLimit: 36, brace: '16" Support Brace', bracket: 'Linen Wall Bracket', multipliers: { 'Extra Small Cap': 0.5, 'Small Cap': 2, '1" Screw': 0.4, '1/2 Back Clip': 1.3, 'Linen Wall Bracket': 0.38, 'All Purpose Clamp': 0.2, 'Wall Anchor': 0.26, '16" Support Brace': 0.26 } },
+        "20_Tightmesh": { name: '20" Tightmesh', wasteLimit: 36, brace: '16" Support Brace', bracket: 'Linen Wall Bracket', multipliers: { 'Extra Small Cap': 0.5, 'Small Cap': 2, '1" Screw': 0.4, '1/2 Back Clip': 1.3, 'Linen Wall Bracket': 0.38, 'All Purpose Clamp': 0.2, 'Wall Anchor': 0.26, '16" Support Brace': 0.26 } },
+        "12_RodShelf": { name: '12" Rod & Shelf', wasteLimit: 48, brace: '12" Support Brace', bracket: 'Rod Wall Bracket', multipliers: { 'Extra Small Cap': 0.5, 'Small Cap': 2, 'Large Cap': 2, '1" Screw': 0.4, '1/2 Back Clip': 1.3, 'Rod Wall Bracket': 0.38, 'Rod Spacer Cap': 0.01, 'All Purpose Clamp': 0.2, 'Wall Anchor': 0.26, '12" Support Brace': 0.26 } },
+        "16_RodShelf": { name: '16" Rod & Shelf', wasteLimit: 48, brace: '16" Support Brace', bracket: 'Rod Wall Bracket', multipliers: { 'Extra Small Cap': 0.5, 'Small Cap': 2, 'Large Cap': 2, '1" Screw': 0.4, '1/2 Back Clip': 1.3, 'Rod Wall Bracket': 0.38, 'Rod Spacer Cap': 0.01, 'All Purpose Clamp': 0.2, 'Wall Anchor': 0.26, '16" Support Brace': 0.26 } },
+        "Shoe_Shelf": { name: 'Shoe Shelf (12" Linen)', wasteLimit: 36, brace: '12" Support Brace', bracket: 'Rod Wall Bracket', multipliers: { 'Extra Small Cap': 0.5, 'Small Cap': 2, '1" Screw': 0.4, '1/2 Back Clip': 1.3, 'Rod Wall Bracket': 0.38, 'Rod Spacer Cap': 0.01, 'All Purpose Clamp': 0.2, 'Wall Anchor': 0.26, '12" Support Brace': 0.26, 'Shoe Support': 0.333 } },
+    };
+
+    // Caps required per Open End based on type
+    const CAPS_PER_END = {
+        "12_Freeslide": ['Extra Small Cap', 'Small Cap', 'Large Cap'],
+        "16_Freeslide": ['Extra Small Cap', 'Small Cap', 'Large Cap'],
+        "12_Linen": ['Extra Small Cap', 'Small Cap'],
+        "16_Linen": ['Extra Small Cap', 'Small Cap'],
+        "20_Linen": ['Extra Small Cap', 'Small Cap'],
+        "12_Tightmesh": ['Extra Small Cap', 'Small Cap'],
+        "16_Tightmesh": ['Extra Small Cap', 'Small Cap'],
+        "20_Tightmesh": ['Extra Small Cap', 'Small Cap'],
+        "12_RodShelf": ['Extra Small Cap', 'Small Cap', 'Large Cap'],
+        "16_RodShelf": ['Extra Small Cap', 'Small Cap', 'Large Cap'],
+        "Shoe_Shelf": ['Extra Small Cap', 'Small Cap'],
+    };
+
+    // --- STATE MANAGEMENT ---
+    let rooms = [];
+    let inventory = [];
+
+    // --- INITIALIZATION ---
+    window.onload = function() {
+        populateTypeSelects();
+        addRoom(); // Start with one room
+    };
+
+    function populateTypeSelects() {
+        const invSelect = document.getElementById('invType');
+        invSelect.innerHTML = '';
+        for(let key in SHELF_TYPES) {
+            let opt = document.createElement('option');
+            opt.value = key;
+            opt.innerText = SHELF_TYPES[key].name;
+            invSelect.appendChild(opt);
+        }
+    }
+
+    // --- UI ACTIONS ---
+
+    function addRoom() {
+        const id = Date.now();
+        const roomObj = { id: id, name: '', shelves: [] };
+        rooms.push(roomObj);
+        renderRooms();
+    }
+
+    function removeRoom(id) {
+        if(confirm('Delete this room and all its shelves?')) {
+            rooms = rooms.filter(r => r.id !== id);
+            renderRooms();
+        }
+    }
+
+    function updateRoomName(id, val) {
+        const r = rooms.find(r => r.id === id);
+        if(r) r.name = val;
+    }
+
+    function addShelf(roomId) {
+        const r = rooms.find(r => r.id === roomId);
+        if(r) {
+            r.shelves.push({
+                id: Date.now() + Math.random(),
+                type: "12_Freeslide",
+                length: 0,
+                openEnds: 0,
+                corner: false
+            });
+            renderRooms();
+        }
+    }
+
+    function removeShelf(roomId, shelfId) {
+        const r = rooms.find(r => r.id === roomId);
+        if(r) {
+            r.shelves = r.shelves.filter(s => s.id !== shelfId);
+            renderRooms();
+        }
+    }
+
+    function updateShelf(roomId, shelfId, field, val) {
+        const r = rooms.find(r => r.id === roomId);
+        if(r) {
+            const s = r.shelves.find(s => s.id === shelfId);
+            if(s) {
+                if(field === 'length') s.length = parseFloat(val) || 0;
+                else if(field === 'type') s.type = val;
+                else if(field === 'openEnds') s.openEnds = parseInt(val);
+                else if(field === 'corner') s.corner = val; // boolean
+            }
+        }
+    }
+
+    function addInventory() {
+        const type = document.getElementById('invType').value;
+        const len = parseFloat(document.getElementById('invLength').value);
+        
+        if(!len || len <= 0) return alert("Please enter a valid length");
+
+        inventory.push({ type, length: len, id: Date.now() });
+        document.getElementById('invLength').value = '';
+        renderInventory();
+    }
+
+    function removeInventory(id) {
+        inventory = inventory.filter(i => i.id !== id);
+        renderInventory();
+    }
+
+    // --- RENDERING ---
+
+    function renderRooms() {
+        const container = document.getElementById('roomsContainer');
+        container.innerHTML = '';
+
+        rooms.forEach((room, rIndex) => {
+            const div = document.createElement('div');
+            div.className = 'room-container';
+            div.innerHTML = `
+                <div class="room-header">
+                    <input type="text" placeholder="Room Name (e.g. Master Closet)" 
+                           value="${room.name}" 
+                           onchange="updateRoomName(${room.id}, this.value)"
+                           style="background:transparent; border:none; font-weight:bold; width: 70%;">
+                    <button class="btn btn-sm btn-danger" onclick="removeRoom(${room.id})">Remove Room</button>
+                </div>
+                <div class="shelf-list">
+                    ${room.shelves.map(shelf => `
+                        <div class="shelf-item">
+                            <div>
+                                <label>Shelf Type</label>
+                                <select onchange="updateShelf(${room.id}, ${shelf.id}, 'type', this.value)">
+                                    ${Object.keys(SHELF_TYPES).map(k => `<option value="${k}" ${shelf.type === k ? 'selected' : ''}>${SHELF_TYPES[k].name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label>Length (in)</label>
+                                <input type="number" value="${shelf.length || ''}" placeholder='0"' onchange="updateShelf(${room.id}, ${shelf.id}, 'length', this.value)">
+                            </div>
+                            <div>
+                                <label>Open Ends</label>
+                                <select onchange="updateShelf(${room.id}, ${shelf.id}, 'openEnds', this.value)">
+                                    <option value="0" ${shelf.openEnds == 0 ? 'selected' : ''}>Wall-to-Wall (0)</option>
+                                    <option value="1" ${shelf.openEnds == 1 ? 'selected' : ''}>1 Open End</option>
+                                    <option value="2" ${shelf.openEnds == 2 ? 'selected' : ''}>2 Open Ends</option>
+                                </select>
+                            </div>
+                            <div style="text-align:center;">
+                                <label>Corner?</label><br>
+                                <input type="checkbox" ${shelf.corner ? 'checked' : ''} onchange="updateShelf(${room.id}, ${shelf.id}, 'corner', this.checked)">
+                            </div>
+                            <button style="background:none; border:none; color:red; cursor:pointer; font-weight:bold;" title="Remove Shelf" onclick="removeShelf(${room.id}, ${shelf.id})">&times;</button>
+                        </div>
+                    `).join('')}
+                    <button class="btn btn-sm btn-outline" style="margin-top:10px;" onclick="addShelf(${room.id})">+ Add Shelf</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function renderInventory() {
+        const container = document.getElementById('inventoryList');
+        container.innerHTML = inventory.map(item => `
+            <span class="chip">
+                ${SHELF_TYPES[item.type].name}: ${item.length}" 
+                <span onclick="removeInventory(${item.id})" style="cursor:pointer; margin-left:5px; font-weight:bold;">&times;</span>
+            </span>
+        `).join('');
+    }
+
+    function resetJob() {
+        if(confirm("Clear all data?")) {
+            rooms = [];
+            inventory = [];
+            addRoom();
+            renderInventory();
+            document.getElementById('resultsArea').style.display = 'none';
+        }
+    }
+
+    // --- CALCULATION LOGIC ---
+
+    function calculateJob() {
+        // Validate
+        let hasData = false;
+        rooms.forEach(r => { if(r.shelves.length > 0) hasData = true; });
+        if(!hasData) return alert("Please add at least one shelf.");
+
+        // Update UI
+        document.getElementById('resJobName').innerText = document.getElementById('jobName').value || "Untitled Job";
+        document.getElementById('resultsArea').style.display = 'block';
+
+        // 1. Group Requests by Type
+        const groupedCuts = {};
+        const hardwareTotals = {};
+
+        rooms.forEach(room => {
+            room.shelves.forEach(shelf => {
+                if(shelf.length <= 0) return;
+                
+                if(!groupedCuts[shelf.type]) groupedCuts[shelf.type] = [];
+                groupedCuts[shelf.type].push(shelf.length);
+
+                // --- HARDWARE CALC ---
+                const specs = SHELF_TYPES[shelf.type];
+                const feet = shelf.length / 12;
+
+                // Base Linear Feet Formula
+                for(let hw in specs.multipliers) {
+                    if(!hardwareTotals[hw]) hardwareTotals[hw] = 0;
+                    hardwareTotals[hw] += (feet * specs.multipliers[hw]);
+                }
+
+                // Open End Modifiers
+                if(shelf.openEnds > 0) {
+                    // Add Caps
+                    const caps = CAPS_PER_END[shelf.type];
+                    caps.forEach(cap => {
+                        if(!hardwareTotals[cap]) hardwareTotals[cap] = 0;
+                        hardwareTotals[cap] += (shelf.openEnds * 1); // 1 set per end
+                    });
+
+                    // Add Brace / Remove Bracket
+                    const braceName = specs.brace;
+                    const bracketName = specs.bracket;
+                    
+                    if(!hardwareTotals[braceName]) hardwareTotals[braceName] = 0;
+                    if(!hardwareTotals[bracketName]) hardwareTotals[bracketName] = 0;
+
+                    hardwareTotals[braceName] += shelf.openEnds;
+                    hardwareTotals[bracketName] -= shelf.openEnds;
+                }
+
+                // Corner Modifier
+                if(shelf.corner) {
+                    if(!hardwareTotals['Metal Corner Bracket']) hardwareTotals['Metal Corner Bracket'] = 0;
+                    hardwareTotals['Metal Corner Bracket'] += 1;
+                }
+            });
+        });
+
+        // 2. Generate Cut List (Bin Packing)
+        const cutReportHTML = Object.keys(groupedCuts).map(type => {
+            const cuts = groupedCuts[type];
+            const typeInv = inventory.filter(i => i.type === type).map(i => i.length).sort((a,b) => a-b); // Smallest to largest inventory
+            const report = binPack(cuts, typeInv, SHELF_TYPES[type].wasteLimit);
+            
+            return `
+                <div style="margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 5px; border-bottom: 1px solid #ddd;">${SHELF_TYPES[type].name}</h4>
+                    <div style="margin-bottom: 5px;"><strong>Total 12' Stock Needed: ${report.newStockCount}</strong></div>
+                    ${report.logs.map(log => `
+                        <div class="stock-piece">
+                            <div><strong>${log.source}:</strong> ${log.cuts.join(", ")}</div>
+                            ${log.remnant > 0 
+                                ? `<div class="${log.remnant >= SHELF_TYPES[type].wasteLimit ? 'waste-save' : 'waste-trash'}">Remnant: ${log.remnant}" ${log.remnant >= SHELF_TYPES[type].wasteLimit ? '(SAVE)' : '(WASTE)'}</div>` 
+                                : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }).join('');
+
+        document.getElementById('cutListContainer').innerHTML = cutReportHTML;
+
+        // 3. Render Hardware
+        const hwBody = document.getElementById('hardwareTableBody');
+        hwBody.innerHTML = '';
+        Object.keys(hardwareTotals).sort().forEach(key => {
+            const val = Math.ceil(hardwareTotals[key]);
+            if(val > 0) {
+                hwBody.innerHTML += `<tr><td>${key}</td><td>${val}</td></tr>`;
+            }
+        });
+
+        // Scroll to results
+        document.getElementById('resultsArea').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- ALGORITHM: Best Fit Decreasing ---
+    function binPack(cutsNeeded, availableInventory, wasteLimit) {
+        // Sort cuts largest to smallest
+        cutsNeeded.sort((a, b) => b - a);
+
+        let logs = [];
+        let newStockCount = 0;
+
+        // Create virtual "bins" representing available inventory pieces
+        // We will remove from this list as we use them
+        let inventoryBins = availableInventory.map((len, idx) => ({ id: `Inv-${idx}`, len: len, cuts: [], used: false }));
+        
+        // Active stock pieces (144")
+        let stockBins = [];
+
+        cutsNeeded.forEach(cut => {
+            let placed = false;
+
+            // 1. Try to fit in Inventory (Best Fit)
+            // Find smallest inventory piece that fits this cut
+            let bestInvIndex = -1;
+            let minRemnant = 99999;
+
+            for(let i=0; i<inventoryBins.length; i++) {
+                if(!inventoryBins[i].used && inventoryBins[i].len >= cut) {
+                    let rem = inventoryBins[i].len - cut;
+                    if(rem < minRemnant) {
+                        minRemnant = rem;
+                        bestInvIndex = i;
+                    }
+                }
+            }
+
+            if(bestInvIndex > -1) {
+                // Use Inventory
+                let bin = inventoryBins[bestInvIndex];
+                bin.used = true; // Mark as fully consumed for simplicity of "one job", or logic could allow multiple cuts from one scrap. 
+                // Detailed logic: Actually we should allow multiple cuts from scrap.
+                // Let's treat inventory as a bin that shrinks.
+                bin.used = false; // Keep it active
+                bin.len -= cut;
+                bin.cuts.push(cut + '"');
+                placed = true;
+            }
+
+            // 2. Try to fit in existing Stock Bins (Best Fit)
+            if(!placed) {
+                let bestStockIndex = -1;
+                minRemnant = 99999;
+                
+                for(let i=0; i<stockBins.length; i++) {
+                    if(stockBins[i].remaining >= cut) {
+                        let rem = stockBins[i].remaining - cut;
+                        if(rem < minRemnant) {
+                            minRemnant = rem;
+                            bestStockIndex = i;
+                        }
+                    }
+                }
+
+                if(bestStockIndex > -1) {
+                    stockBins[bestStockIndex].remaining -= cut;
+                    stockBins[bestStockIndex].cuts.push(cut + '"');
+                    placed = true;
+                }
+            }
+
+            // 3. Open New Stock
+            if(!placed) {
+                newStockCount++;
+                let newBin = { 
+                    id: newStockCount, 
+                    remaining: 144 - cut, 
+                    cuts: [cut + '"'] 
+                };
+                stockBins.push(newBin);
+            }
+        });
+
+        // Compile Report
+        // Inventory Logs
+        inventoryBins.forEach(bin => {
+            if(bin.cuts.length > 0) {
+                logs.push({ 
+                    source: `Inventory Cutoff (${parseFloat(bin.len) + bin.cuts.reduce((a,c)=>a+parseFloat(c),0)} in)`, 
+                    cuts: bin.cuts, 
+                    remnant: parseFloat(bin.len.toFixed(2)) 
+                });
+            }
+        });
+
+        // Stock Logs
+        stockBins.forEach((bin, idx) => {
+            logs.push({
+                source: `New Stock Piece #${idx+1} (12')`,
+                cuts: bin.cuts,
+                remnant: parseFloat(bin.remaining.toFixed(2))
+            });
+        });
+
+        return { newStockCount, logs };
+    }
+
+</script>
+
+</body>
+</html>
